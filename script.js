@@ -1,4 +1,4 @@
-const chatBox = document.getElementById("chat-box");
+const chatbox = document.getElementById("chatbox");
 const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
@@ -7,39 +7,48 @@ userInput.addEventListener("keypress", function (e) {
     if (e.key === "Enter") sendMessage();
 });
 
-function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
-
-    displayMessage(message, "user");
-    userInput.value = "";
-
-    fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            inputs: {
-                text: message
-            }
-        })
-    })
-    .then((res) => res.json())
-    .then((data) => {
-        const reply = data.generated_text || "⚠️ Failed to get a proper reply. Try again.";
-        displayMessage(reply, "bot");
-    })
-    .catch((error) => {
-        displayMessage("❌ Failed to get response. Please try again.", "bot");
-        console.error(error);
-    });
+function addMessage(message, className) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${className}`;
+    messageDiv.innerText = message;
+    chatbox.appendChild(messageDiv);
+    chatbox.scrollTop = chatbox.scrollHeight;
 }
 
-function displayMessage(text, sender) {
-    const messageDiv = document.createElement("div");
-    messageDiv.classList.add("message", sender);
-    messageDiv.innerText = text;
-    chatBox.appendChild(messageDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
+async function sendMessage() {
+    const input = userInput.value.trim();
+    if (!input) return;
+
+    addMessage(input, "user");
+    userInput.value = "";
+
+    try {
+        const response = await queryHuggingFace(input);
+        const answer = response?.[0]?.generated_text || "🤖 I couldn't find an answer.";
+        addMessage(answer, "bot");
+    } catch (err) {
+        console.error(err);
+        addMessage("⚠️ Failed to get a proper reply. Try again.", "bot-error");
+    }
+}
+
+async function queryHuggingFace(userMessage) {
+    const HF_API_KEY = "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"; // Replace this with your real API key
+
+    const response = await fetch(
+        "https://api-inference.huggingface.co/models/google/flan-t5-base",
+        {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${HF_API_KEY}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: `Answer this: ${userMessage}`,
+            }),
+        }
+    );
+
+    if (!response.ok) throw new Error("API response error");
+    return await response.json();
 }
