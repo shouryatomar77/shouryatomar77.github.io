@@ -1,5 +1,5 @@
 // ========= CONFIG ========= //
-const OPENAI_API_KEY = "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"; // ← Put your OpenAI key here
+const OPENAI_API_KEY = "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"; // ← Put your OpenAI key here
 
 // ========= ELEMENTS ========= //
 const chatBox = document.getElementById("chat-box");
