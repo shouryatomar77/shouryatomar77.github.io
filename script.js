@@ -1,55 +1,67 @@
-const OPENAI_API_KEY = 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";
+// ========= CONFIG ========= //
+const OPENAI_API_KEY = "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"; // ← Put your OpenAI key here
 
+// ========= ELEMENTS ========= //
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
+// ========= MAIN FUNCTION ========= //
 async function sendMessage() {
   const message = userInput.value.trim();
   if (!message) return;
 
-  displayMessage(message, "user-msg");
+  displayMessage(message, "user");
   userInput.value = "";
-  displayMessage("AIVA is typing...", "aiva-msg", true);
+  displayMessage("AIVA is typing...", "aiva", true);
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }]
-      })
+        messages: [{ role: "user", content: message }],
+      }),
     });
 
     const data = await response.json();
     const reply = data.choices[0].message.content.trim();
 
+    // Remove "AIVA is typing..." bubble
     removeTyping();
-    displayMessage(reply, "aiva-msg");
 
+    displayMessage(reply, "aiva");
   } catch (error) {
     removeTyping();
-    displayMessage("Sorry, there was an error.", "aiva-msg");
+    displayMessage("❌ Failed to get response. Please try again.", "aiva");
+    console.error(error);
   }
 }
 
-function displayMessage(message, className, isTyping = false) {
-  const msg = document.createElement("div");
-  msg.className = className;
-  msg.textContent = message;
-  msg.dataset.typing = isTyping;
-  chatBox.appendChild(msg);
+// ========= DISPLAY MESSAGE ========= //
+function displayMessage(message, sender, isTyping = false) {
+  const msgBubble = document.createElement("div");
+  msgBubble.className = `bubble ${sender}`;
+  msgBubble.textContent = message;
+  msgBubble.dataset.typing = isTyping;
+  chatBox.appendChild(msgBubble);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// ========= REMOVE TYPING BUBBLE ========= //
 function removeTyping() {
-  const typingMsgs = chatBox.querySelectorAll('[data-typing="true"]');
-  typingMsgs.forEach(el => el.remove());
+  const typingBubble = [...chatBox.querySelectorAll(".bubble")].find(
+    (b) => b.dataset.typing === "true"
+  );
+  if (typingBubble) typingBubble.remove();
 }
 
-userInput.addEventListener("keydown", function(e) {
+// ========= EVENT LISTENERS ========= //
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keydown", function (e) {
   if (e.key === "Enter") sendMessage();
 });
