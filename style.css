@@ -1,6 +1,6 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f4f4f4;
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
   margin: 0;
   padding: 0;
   display: flex;
@@ -10,76 +10,65 @@ body {
 }
 
 .chat-container {
-  background: white;
-  width: 100%;
+  width: 90%;
   max-width: 600px;
-  height: 90vh;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.header {
-  background: #0078D7;
+.chat-header {
+  background-color: #0078d7;
   color: white;
-  padding: 1rem;
-  font-size: 1.2rem;
+  padding: 16px;
+  font-size: 18px;
   text-align: center;
-  border-radius: 10px 10px 0 0;
 }
 
 .chat-box {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #fff;
 }
 
-.user-msg, .aiva-msg {
+.message {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 12px;
   max-width: 80%;
-  padding: 10px 15px;
-  border-radius: 15px;
-  font-size: 1rem;
-  line-height: 1.4;
+  word-wrap: break-word;
 }
 
-.user-msg {
-  background: #DCF8C6;
+.user {
+  background-color: #d1e7dd;
   align-self: flex-end;
 }
 
-.aiva-msg {
-  background: #e3e3e3;
+.bot {
+  background-color: #f8d7da;
   align-self: flex-start;
 }
 
-.input-area {
+.input-container {
   display: flex;
-  padding: 1rem;
-  border-top: 1px solid #ddd;
+  padding: 10px;
+  border-top: 1px solid #ccc;
 }
 
 #user-input {
   flex: 1;
   padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
-button {
-  margin-left: 10px;
-  padding: 10px 15px;
-  background: #0078D7;
+#send-btn {
+  padding: 10px 16px;
+  background-color: #0078d7;
   color: white;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-}
-
-button:hover {
-  background: #005fa3;
 }
