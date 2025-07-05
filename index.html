@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AIVA - Your AI Assistant</title>
+  <title>AIVA - AI Assistant</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="chat-container">
-    <div class="header">AIVA - Your AI Assistant</div>
-    <div id="chatbox" class="chat-box"></div>
+    <div class="chat-header">AIVA - Your AI Assistant</div>
+    <div class="chat-box" id="chatBox"></div>
     <div class="input-container">
-      <input id="user-input" type="text" placeholder="Ask me anything..." />
-      <button id="send-btn">Send</button>
+      <input type="text" id="userInput" placeholder="Ask me anything..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
   </div>
   <script src="script.js"></script>

@@ -1,55 +1,52 @@
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
 
-const chatbox = document.getElementById("chatbox");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", function (e) {
-  if (e.key === "Enter") sendMessage();
-});
-
-function addMessage(message, className) {
-  const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${className}`;
-  messageDiv.innerText = message;
-  chatbox.appendChild(messageDiv);
-  chatbox.scrollTop = chatbox.scrollHeight;
-}
+const HF_API_KEY = "hf_your_actual_key_here"; // Replace with your Hugging Face API key
+const HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small";
 
 async function sendMessage() {
-  const input = userInput.value.trim();
-  if (!input) return;
+  const message = userInput.value.trim();
+  if (!message) return;
 
-  addMessage(input, "user");
+  appendMessage("user", message);
   userInput.value = "";
+  appendMessage("bot", "Thinking...", true);
 
   try {
-    const response = await queryHuggingFace(input);
-    const answer = response?.[0]?.generated_text || "🤖 I couldn't find an answer.";
-    addMessage(answer, "bot");
-  } catch (err) {
-    console.error(err);
-    addMessage("⚠️ Failed to get a proper reply. Try again.", "bot-error");
-  }
-}
-
-async function queryHuggingFace(userMessage) {
-  const HF_API_KEY = "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"; // Replace with your own API key
-
-  const response = await fetch(
-    "https://api-inference.huggingface.co/models/google/flan-t5-base",
-    {
+    const response = await fetch(HF_API_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${HF_API_KEY}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        inputs: `Answer this: ${userMessage}`,
-      }),
-    }
-  );
+      body: JSON.stringify({ inputs: message })
+    });
 
-  if (!response.ok) throw new Error("API response error");
-  return await response.json();
+    const result = await response.json();
+    document.querySelector(".bot-message.typing").remove();
+
+    if (result && result.length > 0 && result[0].generated_text) {
+      appendMessage("bot", result[0].generated_text);
+    } else if (result && result.generated_text) {
+      appendMessage("bot", result.generated_text);
+    } else {
+      appendMessage("bot", "⚠️ Could not get a response.", true);
+    }
+  } catch (error) {
+    document.querySelector(".bot-message.typing").remove();
+    appendMessage("bot", "❌ Error reaching Hugging Face API. Try again later.", true);
+  }
 }
+
+function appendMessage(sender, text, isTyping = false) {
+  const message = document.createElement("div");
+  message.classList.add("message", `${sender}-message`);
+  if (isTyping) message.classList.add("typing");
+  message.textContent = text;
+  chatBox.appendChild(message);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+userInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
