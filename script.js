@@ -34,7 +34,7 @@ async function sendMessage() {
 }
 
 async function queryHuggingFace(userMessage) {
-  const HF_API_KEY = "YOUR_HUGGINGFACE_API_KEY"; // Replace with your own API key
+  const HF_API_KEY = "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"; // Replace with your own API key
 
   const response = await fetch(
     "https://api-inference.huggingface.co/models/google/flan-t5-base",
