@@ -1,58 +1,60 @@
-const HF_API_KEY = "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"; // 🔁 Replace with your Hugging Face API key
-
-async function sendMessage() {
-  const inputField = document.getElementById("user-input");
-  const userText = inputField.value.trim();
-  if (!userText) return;
-
-  appendMessage(userText, "user");
-  appendMessage("Thinking...", "bot", true);
-
-  inputField.value = "";
-  inputField.disabled = true;
-
-  try {
-    const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${HF_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ inputs: userText })
-    });
-
-    const data = await response.json();
-    removeTemp();
-
-    if (data && data[0] && data[0].generated_text) {
-      appendMessage(data[0].generated_text, "bot");
-    } else {
-      appendMessage("⚠️ Could not get a proper response.", "error");
-    }
-  } catch (err) {
-    removeTemp();
-    appendMessage("⚠️ Error connecting to API.", "error");
-  } finally {
-    inputField.disabled = false;
-    inputField.focus();
-  }
-}
-
-function appendMessage(text, type, isTemp = false) {
-  const chatBox = document.getElementById("chat-box");
+window.onload = () => {
+  setTimeout(() => {
+    document.querySelector('.splash').style.display = 'none';
+    document.querySelector('.chat-container').style.display = 'flex';
+  }, 3500);
+};
+const input = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatBox = document.getElementById("chatbox");
+const micBtn = document.getElementById("micBtn");
+const notifySound = document.getElementById("notify");
+function appendMessage(text, sender) {
   const msg = document.createElement("div");
-  msg.className = `message ${type}`;
-  if (isTemp) msg.id = "temp-msg";
-  msg.innerText = text;
+  msg.className = sender === "user" ? "user-msg" : "bot-msg";
+  msg.textContent = text;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
+  notifySound.play();
 }
-
-function removeTemp() {
-  const temp = document.getElementById("temp-msg");
-  if (temp) temp.remove();
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = speechSynthesis.getVoices().find(v => v.lang === 'en-US');
+  speechSynthesis.speak(utterance);
 }
-
-document.getElementById("user-input").addEventListener("keypress", function (e) {
-  if (e.key === "Enter") sendMessage();
+async function askAIVA(question) {
+  appendMessage(question, "user");
+  let reply = "Thinking...";
+  try {
+    const res = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-small", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs: question })
+    });
+    const data = await res.json();
+    reply = data[0]?.generated_text || "I couldn’t understand that.";
+  } catch (e) {
+    reply = "Error reaching AI server.";
+  }
+  appendMessage(reply, "bot");
+  speak(reply);
+}
+sendBtn.onclick = () => {
+  const msg = input.value.trim();
+  if (msg) {
+    askAIVA(msg);
+    input.value = "";
+  }
+};
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendBtn.click();
 });
+micBtn.onclick = () => {
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.onresult = (e) => {
+    input.value = e.results[0][0].transcript;
+    sendBtn.click();
+  };
+  recognition.start();
+};
