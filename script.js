@@ -33,16 +33,20 @@ async function askAIVA(question) {
   try {
     const res = await fetch("https://huggingface.co/spaces/yuntian-deng/ChatGPT/raw/main/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputs: question })
     });
 
     const data = await res.json();
-    reply = data?.generated || "Sorry, I didn’t get that.";
+    reply = data?.generated?.trim();
+    
+    if (!reply || reply.toLowerCase().includes("i don't")) {
+      const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(question)}`);
+      const wikiData = await wikiRes.json();
+      reply = wikiData.extract || "Sorry, I didn’t get that.";
+    }
   } catch (e) {
-    reply = "Error reaching AI server.";
+    reply = "Sorry, I didn’t get that.";
   }
 
   appendMessage(reply, "bot");
