@@ -28,24 +28,19 @@ function speak(text) {
 
 async function askAIVA(question) {
   appendMessage(question, "user");
-
   let reply = "Thinking...";
 
   try {
-    const res = await fetch("https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium", {
+    const res = await fetch("https://huggingface.co/spaces/yuntian-deng/ChatGPT/raw/main/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        inputs: {
-          text: question
-        }
-      })
+      body: JSON.stringify({ inputs: question })
     });
 
     const data = await res.json();
-    reply = data?.generated_text || "Sorry, I didn’t get that.";
+    reply = data?.generated || "Sorry, I didn’t get that.";
   } catch (e) {
     reply = "Error reaching AI server.";
   }
