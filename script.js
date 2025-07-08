@@ -26,6 +26,21 @@ function speak(text) {
   speechSynthesis.speak(utterance);
 }
 
+// ✅ Wikipedia API via CORS Proxy
+async function fetchWikipediaSummary(query) {
+  const wikiURL = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+  const proxyURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(wikiURL)}`;
+  try {
+    const res = await fetch(proxyURL);
+    if (!res.ok) throw new Error("Wikipedia request failed");
+    const data = await res.json();
+    return data.extract || null;
+  } catch {
+    return null;
+  }
+}
+
+// 🧠 Ask AIVA
 async function askAIVA(question) {
   appendMessage(question, "user");
   let reply = "Thinking...";
@@ -39,11 +54,11 @@ async function askAIVA(question) {
 
     const data = await res.json();
     reply = data?.generated?.trim();
-    
+
+    // Fallback to Wikipedia
     if (!reply || reply.toLowerCase().includes("i don't")) {
-      const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(question)}`);
-      const wikiData = await wikiRes.json();
-      reply = wikiData.extract || "Sorry, I didn’t get that.";
+      const wikiReply = await fetchWikipediaSummary(question);
+      reply = wikiReply || "Sorry, I didn’t get that.";
     }
   } catch (e) {
     reply = "Sorry, I didn’t get that.";
@@ -53,6 +68,7 @@ async function askAIVA(question) {
   speak(reply);
 }
 
+// ✉️ Send button click
 sendBtn.onclick = () => {
   const msg = input.value.trim();
   if (msg) {
@@ -61,10 +77,12 @@ sendBtn.onclick = () => {
   }
 };
 
+// ⌨️ Enter key support
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
 
+// 🎤 Voice input (mic)
 micBtn.onclick = () => {
   const recognition = new webkitSpeechRecognition();
   recognition.lang = "en-US";
