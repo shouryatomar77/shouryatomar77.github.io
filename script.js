@@ -1,59 +1,53 @@
-const chatContainer = document.getElementById("chat-container");
-const userInput = document.getElementById("user-input");
-const sendButton = document.getElementById("send-button");
 
-const appendMessage = (sender, message) => {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", sender);
-  messageDiv.innerText = message;
-  chatContainer.appendChild(messageDiv);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
-};
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("user-input");
 
-const fetchWikipediaSummary = async (query) => {
-  try {
-    const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+function appendMessage(message, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = sender;
+    messageDiv.innerText = message;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-    if (data.extract) {
-      return data.extract;
-    } else {
-      return "I couldn't find anything useful on Wikipedia.";
-    }
-  } catch (error) {
-    return "Wikipedia lookup failed.";
-  }
-};
+const badWords = ["fuck", "shit", "bitch"];
 
-const sendMessage = async () => {
-  const input = userInput.value.trim();
-  if (!input) return;
+function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
 
-  appendMessage("user", input);
-  userInput.value = "";
+    appendMessage(text, "user");
+    input.value = "";
 
-  try {
-    const response = await fetch("https://huggingface.co/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: input })
-    });
-
-    const data = await response.json();
-    let output = data.generated_text || data.generated_text?.[0] || "";
-
-    if (!output || output.toLowerCase().includes("i don't understand") || output.length < 5) {
-      output = await fetchWikipediaSummary(input);
+    if (badWords.some(word => text.toLowerCase().includes(word))) {
+        appendMessage("⚠️ Please avoid using offensive language.", "bot");
+        return;
     }
 
-    appendMessage("bot", output);
-  } catch (error) {
-    appendMessage("bot", "Oops! Something went wrong.");
-  }
-};
+    fetchWikipedia(text);
+}
 
-sendButton.addEventListener("click", sendMessage);
-userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendMessage();
+function fetchWikipedia(query) {
+    const apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent("https://en.wikipedia.org/api/rest_v1/page/summary/" + query)}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error("Network response failed");
+            return response.json();
+        })
+        .then(data => {
+            const result = JSON.parse(data.contents);
+            if (result.extract) {
+                appendMessage(result.extract, "bot");
+            } else {
+                appendMessage("I couldn't find anything useful on that.", "bot");
+            }
+        })
+        .catch(error => {
+            appendMessage("Oops! Something went wrong.", "bot");
+        });
+}
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
 });
