@@ -5,27 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AIVA - Your AI Assistant</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="aiva-logo.png" />
 </head>
 <body>
-  <div class="splash">
-    <img src="aiva-logo.png" alt="AIVA Logo" class="logo" />
-    <p>Loading AIVA...</p>
+  <div id="chat-container" class="chat-container">
+    <h2>🤖 AIVA Assistant</h2>
   </div>
-
-  <div class="chat-container">
-    <div class="header">🤖 AIVA Assistant</div>
-    <div id="chatbox" class="chat-box"></div>
-    <div class="input-area">
-      <input type="text" id="userInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
-      <button id="micBtn">🎤</button>
-    </div>
+  <div class="input-container">
+    <input type="text" id="user-input" placeholder="Type your message..." />
+    <button id="send-button">Send</button>
   </div>
-
-  <audio id="bg-music" src="background.mp3" loop autoplay></audio>
-  <audio id="notify" src="notify.mp3"></audio>
-
   <script src="script.js"></script>
 </body>
 </html>

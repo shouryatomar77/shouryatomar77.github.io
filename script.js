@@ -1,94 +1,59 @@
-window.onload = () => {
-  setTimeout(() => {
-    document.querySelector('.splash').style.display = 'none';
-    document.querySelector('.chat-container').style.display = 'flex';
-  }, 3500);
+const chatContainer = document.getElementById("chat-container");
+const userInput = document.getElementById("user-input");
+const sendButton = document.getElementById("send-button");
+
+const appendMessage = (sender, message) => {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message", sender);
+  messageDiv.innerText = message;
+  chatContainer.appendChild(messageDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 };
 
-const input = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatBox = document.getElementById("chatbox");
-const micBtn = document.getElementById("micBtn");
-const notifySound = document.getElementById("notify");
-
-function appendMessage(text, sender) {
-  const msg = document.createElement("div");
-  msg.className = sender === "user" ? "user-msg" : "bot-msg";
-  msg.textContent = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-  notifySound.play();
-}
-
-function speak(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = speechSynthesis.getVoices().find(v => v.lang === 'en-US');
-  speechSynthesis.speak(utterance);
-}
-
-// ✅ Wikipedia API via CORS Proxy
-async function fetchWikipediaSummary(query) {
-  const wikiURL = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-  const proxyURL = `https://api.allorigins.win/raw?url=${encodeURIComponent(wikiURL)}`;
+const fetchWikipediaSummary = async (query) => {
   try {
-    const res = await fetch(proxyURL);
-    if (!res.ok) throw new Error("Wikipedia request failed");
-    const data = await res.json();
-    return data.extract || null;
-  } catch {
-    return null;
+    const apiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.extract) {
+      return data.extract;
+    } else {
+      return "I couldn't find anything useful on Wikipedia.";
+    }
+  } catch (error) {
+    return "Wikipedia lookup failed.";
   }
-}
+};
 
-// 🧠 Ask AIVA
-async function askAIVA(question) {
-  appendMessage(question, "user");
-  let reply = "Thinking...";
+const sendMessage = async () => {
+  const input = userInput.value.trim();
+  if (!input) return;
+
+  appendMessage("user", input);
+  userInput.value = "";
 
   try {
-    const res = await fetch("https://huggingface.co/spaces/yuntian-deng/ChatGPT/raw/main/chat", {
+    const response = await fetch("https://huggingface.co/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: question })
+      body: JSON.stringify({ inputs: input })
     });
 
-    const data = await res.json();
-    reply = data?.generated?.trim();
+    const data = await response.json();
+    let output = data.generated_text || data.generated_text?.[0] || "";
 
-    // Fallback to Wikipedia
-    if (!reply || reply.toLowerCase().includes("i don't")) {
-      const wikiReply = await fetchWikipediaSummary(question);
-      reply = wikiReply || "Sorry, I didn’t get that.";
+    if (!output || output.toLowerCase().includes("i don't understand") || output.length < 5) {
+      output = await fetchWikipediaSummary(input);
     }
-  } catch (e) {
-    reply = "Sorry, I didn’t get that.";
-  }
 
-  appendMessage(reply, "bot");
-  speak(reply);
-}
-
-// ✉️ Send button click
-sendBtn.onclick = () => {
-  const msg = input.value.trim();
-  if (msg) {
-    askAIVA(msg);
-    input.value = "";
+    appendMessage("bot", output);
+  } catch (error) {
+    appendMessage("bot", "Oops! Something went wrong.");
   }
 };
 
-// ⌨️ Enter key support
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendBtn.click();
+sendButton.addEventListener("click", sendMessage);
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
 });
-
-// 🎤 Voice input (mic)
-micBtn.onclick = () => {
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.onresult = (e) => {
-    input.value = e.results[0][0].transcript;
-    sendBtn.click();
-  };
-  recognition.start();
-};

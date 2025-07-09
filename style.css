@@ -1,83 +1,51 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #0e0e0e;
+  font-family: Arial, sans-serif;
+  background-color: #111;
   color: #fff;
-  overflow: hidden;
-}
-.splash {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeOut 2s ease 3s forwards;
-}
-.splash .logo {
-  width: 100px;
-  margin-bottom: 20px;
 }
 .chat-container {
-  display: none;
-  flex-direction: column;
-  height: 100vh;
-  padding: 10px;
-}
-.header {
-  text-align: center;
-  font-size: 24px;
-  padding: 10px;
-  background: #1a1a1a;
-}
-.chat-box {
-  flex: 1;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  height: 80vh;
   overflow-y: auto;
-  padding: 10px;
-  background: #121212;
+  background-color: #000;
 }
-.input-area {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  background: #1a1a1a;
-}
-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-}
-button {
+.message {
+  margin: 10px;
   padding: 10px 15px;
   border-radius: 10px;
-  background: #00bfff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-.user-msg, .bot-msg {
-  margin: 10px 0;
   max-width: 80%;
-  padding: 10px;
-  border-radius: 15px;
-  animation: fadeIn 0.3s;
 }
-.user-msg {
-  background: #0057e7;
+.user {
+  background-color: #005eff;
   align-self: flex-end;
+  color: white;
 }
-.bot-msg {
-  background: #444;
+.bot {
+  background-color: #333;
+  color: white;
   align-self: flex-start;
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.input-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: #222;
 }
-@keyframes fadeOut {
-  to { opacity: 0; visibility: hidden; }
+#user-input {
+  width: 70%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+}
+#send-button {
+  padding: 10px;
+  margin-left: 10px;
+  background-color: #00bfff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
 }
