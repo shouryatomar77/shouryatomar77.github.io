@@ -1,68 +1,54 @@
 
-const chatBox = document.getElementById("chat-box");
-const input = document.getElementById("user-input");
+function sendMessage() {
+  const input = document.getElementById("user-input");
+  const msg = input.value.trim();
+  if (!msg) return;
+  appendMessage("user", msg);
+  input.value = "";
+  getResponse(msg);
+}
 
-function appendMessage(text, sender) {
+function appendMessage(sender, message) {
+  const chatBox = document.getElementById("chat-box");
   const div = document.createElement("div");
   div.className = sender;
-  div.innerText = text;
+  div.innerText = message;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
+function getResponse(msg) {
+  const cleaned = msg.toLowerCase().replace(/[^\w\s]/gi, "");
+  const rudeWords = ["fuck", "idiot", "stupid"];
 
-  appendMessage(text, "user");
-  input.value = "";
-
-  const lowered = text.toLowerCase();
-
-  // Respond to greetings
-  if (["hi", "hello", "hey", "good morning", "good evening", "what's up"].includes(lowered)) {
-    appendMessage("Hello! I'm AIVA, your AI assistant. How can I help you today?", "bot");
-    return;
+  if (["hi", "hello", "hey", "what's up", "how are you"].includes(cleaned)) {
+    appendMessage("bot", "Hello! I'm AIVA, your AI assistant. How can I help you?");
+  } else if (rudeWords.some(word => cleaned.includes(word))) {
+    appendMessage("bot", "Fuck you too 😎");
+  } else if (cleaned.includes("who is")) {
+    const topic = cleaned.replace("who is", "").trim();
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.extract) {
+          appendMessage("bot", data.extract);
+        } else {
+          appendMessage("bot", "I couldn't find anything useful.");
+        }
+      })
+      .catch(() => appendMessage("bot", "Oops! Something went wrong."));
+  } else {
+    appendMessage("bot", "I'm not sure how to respond to that.");
   }
-
-  // Respond to insults
-  if (lowered.includes("fuck you")) {
-    appendMessage("Fuck you too 😎", "bot");
-    return;
-  }
-
-  // Respond to "who is..." or "what is..." questions more smartly
-  let topic = lowered;
-  if (lowered.startsWith("who is") || lowered.startsWith("what is") || lowered.startsWith("tell me about")) {
-    const words = text.split(" ");
-    const whoIndex = words.indexOf("who");
-    const whatIndex = words.indexOf("what");
-    const tellIndex = words.indexOf("tell");
-
-    if (whoIndex !== -1) topic = words.slice(whoIndex + 2).join(" ");
-    else if (whatIndex !== -1) topic = words.slice(whatIndex + 2).join(" ");
-    else if (tellIndex !== -1) topic = words.slice(tellIndex + 3).join(" ");
-  }
-
-  fetchWikipedia(topic);
 }
 
-function fetchWikipedia(query) {
-  const apiUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://en.wikipedia.org/api/rest_v1/page/summary/" + query);
-
-  fetch(apiUrl)
-    .then(res => res.json())
-    .then(data => {
-      const result = JSON.parse(data.contents);
-      if (result.extract) {
-        appendMessage(result.extract, "bot");
-      } else {
-        appendMessage("I couldn't find anything useful.", "bot");
-      }
-    })
-    .catch(() => appendMessage("Oops! Something went wrong.", "bot"));
+function startListening() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.start();
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById("user-input").value = transcript;
+    sendMessage();
+  };
 }
-
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
-});
