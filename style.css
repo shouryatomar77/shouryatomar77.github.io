@@ -1,51 +1,64 @@
 
 body {
-  background-color: #111;
-  color: white;
   font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
+  background: #f0f0f0;
+  color: #333;
 }
-.chat-container {
-  width: 100%;
-  max-width: 700px;
-  margin-top: 20px;
-}
-.chat-box {
-  background-color: #222;
-  padding: 10px;
-  height: 400px;
-  overflow-y: auto;
-  border-radius: 10px;
-}
-.input-area {
-  display: flex;
-  margin-top: 10px;
-}
-input[type="text"] {
-  flex: 1;
-  padding: 10px;
-  font-size: 16px;
-}
-button {
-  padding: 10px;
-  margin-left: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.user {
-  background-color: #005eff;
-  padding: 8px;
-  margin: 5px;
-  border-radius: 10px;
+
+header {
+  background: #000022;
   color: white;
-  text-align: right;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.bot {
-  background-color: #444;
-  padding: 8px;
-  margin: 5px;
-  border-radius: 10px;
+
+.logo {
+  height: 40px;
+}
+
+nav a {
+  color: white;
+  margin-left: 15px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+  background: linear-gradient(to right, #1c92d2, #f2fcfe);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.hero h2 {
+  font-weight: normal;
+  margin-bottom: 20px;
+}
+
+.cta-button {
+  padding: 10px 20px;
+  background: #0000ff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.features {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #000;
+  color: white;
 }
