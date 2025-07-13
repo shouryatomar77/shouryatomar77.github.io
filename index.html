@@ -2,42 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AIVA - Talk Smart. Think Fast.</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <title>AIVA - AI Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <div class="container">
-      <img src="aiva-logo.png" alt="AIVA Logo" class="logo">
-      <nav>
-        <a href="#">Home</a>
-        <a href="#">Courses</a>
-        <a href="#">Pricing</a>
-        <a href="#">About Us</a>
-        <a href="#">Contact</a>
-      </nav>
+  <div class="chat-container">
+    <div class="chat-box" id="chat-box">
+      <div class="bot-message">Hello! I'm AIVA. How can I help you? I support Google and Wikipedia search.</div>
     </div>
-  </header>
-
-  <section class="hero">
-    <h1>Talk Smart. Think Fast.</h1>
-    <h2>Welcome to the future with AIVA</h2>
-    <p>Empower businesses with cutting-edge AI that fosters innovation, efficiency, and growth.</p>
-    <a class="cta-button" href="https://shouryatomar77.github.io" target="_blank">TRY AIVA</a>
-  </section>
-
-  <section class="features">
-    <h2>Transforming industries with AI</h2>
-    <p>Explore how AIVA is revolutionizing industries through intelligent solutions and automation.</p>
-  </section>
-
-  <footer>
-    <div class="container">
-      <p>📞 +91 8439317172 &nbsp;&nbsp;&nbsp; 📧 shouryatanwar777@gmail.com</p>
-      <p>© Shourya Tomar | <a href="https://aiva3.odoo.com" target="_blank">aiva3.odoo.com</a></p>
+    <div class="input-box">
+      <input type="text" id="user-input" placeholder="Type a message..." />
+      <button onclick="startListening()">🎤</button>
+      <button onclick="sendMessage()">Send</button>
     </div>
-  </footer>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>

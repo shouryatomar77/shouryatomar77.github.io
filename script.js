@@ -1,44 +1,47 @@
 
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("user-input");
+
+function appendMessage(sender, text) {
+  const message = document.createElement("div");
+  message.className = sender === "user" ? "user-message" : "bot-message";
+  message.innerText = text;
+  chatBox.appendChild(message);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 function sendMessage() {
-  const input = document.getElementById("user-input");
   const msg = input.value.trim();
   if (!msg) return;
   appendMessage("user", msg);
   input.value = "";
-  getResponse(msg);
+  getAIVAResponse(msg.toLowerCase());
 }
 
-function appendMessage(sender, message) {
-  const chatBox = document.getElementById("chat-box");
-  const div = document.createElement("div");
-  div.className = sender;
-  div.innerText = message;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+function getAIVAResponse(msg) {
+  const rudeWords = ["fuck", "shit", "idiot"];
+  if (rudeWords.some(word => msg.includes(word))) {
+    appendMessage("bot", "Please don’t use offensive language.");
+    return;
+  }
 
-function getResponse(msg) {
-  const cleaned = msg.toLowerCase().replace(/[^\w\s]/gi, "");
-  const rudeWords = ["fuck", "idiot", "stupid"];
+  const greetings = ["hi", "hello", "hey"];
+  if (greetings.some(g => msg.includes(g))) {
+    appendMessage("bot", "Hi! How can I help you?");
+    return;
+  }
 
-  if (["hi", "hello", "hey", "what's up", "how are you"].includes(cleaned)) {
-    appendMessage("bot", "Hello! I'm AIVA, your AI assistant. How can I help you?");
-  } else if (rudeWords.some(word => cleaned.includes(word))) {
-    appendMessage("bot", "Fuck you too 😎");
-  } else if (cleaned.includes("who is")) {
-    const topic = cleaned.replace("who is", "").trim();
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`)
+  if (msg.startsWith("who is") || msg.startsWith("what is")) {
+    const topic = msg.replace(/who is|what is|\?/g, "").trim().replace(/ /g, "_");
+    fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + topic)
       .then(res => res.json())
       .then(data => {
-        if (data.extract) {
-          appendMessage("bot", data.extract);
-        } else {
-          appendMessage("bot", "I couldn't find anything useful.");
-        }
+        if (data.extract) appendMessage("bot", data.extract);
+        else appendMessage("bot", "I couldn’t find anything useful.");
       })
       .catch(() => appendMessage("bot", "Oops! Something went wrong."));
   } else {
-    appendMessage("bot", "I'm not sure how to respond to that.");
+    appendMessage("bot", "I’m not sure how to respond. Try asking: Who is Elon Musk?");
   }
 }
 
@@ -47,8 +50,7 @@ function startListening() {
   recognition.lang = "en-US";
   recognition.start();
   recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById("user-input").value = transcript;
+    input.value = event.results[0][0].transcript;
     sendMessage();
   };
 }
